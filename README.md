@@ -1,2 +1,4 @@
-# scanpy
-Nix package  for scanpy - scRNA-seq analysis
+# Nix packages - bioinformatics
+## list of packages 
+- scanpy
+- ... 
