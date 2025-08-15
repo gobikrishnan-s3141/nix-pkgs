@@ -1,23 +1,46 @@
 {
-  description = "Flake for Scanpy";
-
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs =
+    { self, nixpkgs, ... }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-    in {
-      packages.${system}.default = pkgs.python3Packages.scanpy;
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          f {
+            inherit system;
+            pkgs = import nixpkgs { inherit system; };
+          }
+        );
+    in
+    {
+      packages = forEachSupportedSystem (
+        { pkgs, ... }:
+        let
+          custom = import ./default.nix { inherit pkgs; };
+        in
+        {
+          inherit (custom) scanpy;
+          default = pkgs.python312.withPackages (ps: [ custom.scanpy ]);
+        }
+      );
 
-      devShells.${system}.default = pkgs.mkShell {
-        buildInputs = [
-          pkgs.python3Packages.scanpy
-          pkgs.python3Packages.jupyter
-        ];
-      };
+      devShells = forEachSupportedSystem (
+        { pkgs, system, ... }:
+        {
+          default = pkgs.mkShell {
+            packages = [ self.packages.${system}.default ];
+          };
+        }
+      );
     };
 }
-

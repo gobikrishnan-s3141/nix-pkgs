@@ -1,139 +1,24 @@
 {
-  lib,
-  python3,
-  fetchPypi,
+  pkgs ? import <nixpkgs> { },
 }:
-
-python3.pkgs.buildPythonApplication rec {
-  pname = "scanpy";
-  version = "1.11.4";
-  pyproject = true;
-
-  src = fetchPypi {
-    inherit pname version;
-    hash = "sha256-MzGJ7KyccAm/VdQW7i4nLhxJDVTHGUePe03R/ClNL5U=";
+let
+  callPackage = pkgs.lib.callPackageWith (pkgs // pkgs.python3Packages // custom);
+  custom = {
+  bbknn = callPackage ./bbknn.nix{};
+  cudf = callPackage ./cudf.nix{};
+  cugraph = callPackage ./cugraph.nix{};
+  cuml = callPackage ./cuml.nix{};
+  harmonypy = callPackage ./harmonypy.nix{};
+  louvain = callPackage ./louvain.nix{};
+  magic-impute = callPackage ./magic-impute.nix{};
+  sam-algorithm = callPackage ./sam-algorithm.nix{};
+  scanorama = callPackage ./scanorama.nix{};
+  scanpy = callPackage ./scanpy.nix{};
+  scanpydoc = callPackage ./scanpydoc.nix{};
+  session-info = callPackage ./session-info.nix{};
+  session-info2 = callPackage ./session-info2.nix{};
+  pytest-md = callPackage ./pytest-md.nix{};
   };
 
-  build-system = [
-    python3.pkgs.hatch-vcs
-    python3.pkgs.hatchling
-  ];
-
-  dependencies = with python3.pkgs; [
-    anndata
-    h5py
-    joblib
-    legacy-api-wrap
-    matplotlib
-    natsort
-    networkx
-    numba
-    numpy
-    packaging
-    pandas
-    patsy
-    pynndescent
-    scikit-learn
-    scipy
-    seaborn
-    session-info2
-    statsmodels
-    tqdm
-    typing-extensions
-    umap-learn
-  ];
-
-  optional-dependencies = with python3.pkgs; {
-    bbknn = [
-      bbknn
-    ];
-    dask = [
-      anndata
-      dask
-    ];
-    dask-ml = [
-      dask-ml
-      scanpy
-    ];
-    dev = [
-      hatch-vcs
-      pre-commit
-      towncrier
-    ];
-    doc = [
-      ipython
-      matplotlib
-      myst-nb
-      myst-parser
-      nbsphinx
-      sam-algorithm
-      scanpy
-      scanpydoc
-      sphinx
-      sphinx-autodoc-typehints
-      sphinx-book-theme
-      sphinx-copybutton
-      sphinx-design
-      sphinx-issues
-      sphinx-tabs
-      sphinxcontrib-bibtex
-      sphinxext-opengraph
-    ];
-    harmony = [
-      harmonypy
-    ];
-    leiden = [
-      igraph
-      leidenalg
-    ];
-    louvain = [
-      igraph
-      louvain
-    ];
-    magic = [
-      magic-impute
-    ];
-    paga = [
-      igraph
-    ];
-    rapids = [
-      cudf
-      cugraph
-      cuml
-    ];
-    scanorama = [
-      scanorama
-    ];
-    scrublet = [
-      scikit-image
-    ];
-    skmisc = [
-      scikit-misc
-    ];
-    test = [
-      scanpy
-      zarr
-    ];
-    test-min = [
-      pytest
-      pytest-cov
-      pytest-mock
-      pytest-randomly
-      pytest-rerunfailures
-      pytest-xdist
-      tuna
-    ];
-  };
-
-  pythonImportsCheck = [
-    "scanpy"
-  ];
-
-  meta = {
-    description = "Single-Cell Analysis in Python";
-    homepage = "https://pypi.org/project/scanpy/";
-    license = lib.licenses.bsd3;
-    maintainers = with lib.maintainers; [ ];
-    mainProgram = "scanpy";
-  };
-}
+in
+custom
