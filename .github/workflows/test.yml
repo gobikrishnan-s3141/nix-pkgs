@@ -10,5 +10,5 @@ jobs:
     - uses: cachix/install-nix-action@v25
       with:
         nix_path: nixpkgs=channel:nixos-unstable
-    - run: nix-build
+    - run: cd scanpy && nix-build
     - run: nix-shell --run "echo OK"
